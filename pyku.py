@@ -6,8 +6,8 @@ import curses
 from curses.ascii import isdigit
 
 # natural language toolkit for syllable countin
-#import nltk
-#from nltk.corpus import cmudict
+# import nltk
+# from nltk.corpus import cmudict
  
 ENGLISH_STOPWORDS = set(nltk.corpus.stopwords.words('english'))
 NON_ENGLISH_STOPWORDS = set(nltk.corpus.stopwords.words()) - ENGLISH_STOPWORDS
@@ -27,16 +27,28 @@ def is_haiku(text):
     # this is bullshit.
     if filter(str.isdigit, str(text)):
         return False
-    words = nltk.wordpunct_tokenize(re.sub('[^a-zA-Z_ ]', '',text))
 
+    # TODO:
+    # This removes all puncuation, but since we're doing this on code, we don't 
+    # necessarily want that.
+    words = nltk.wordpunct_tokenize(re.sub('[^a-zA-Z_ ]', '',text))
     syl_count = 0
     word_count = 0
     haiku_line_count = 0
     lines = []
     d = cmudict.dict()
+
+    # TODO: Is there a corner case we're missing here?????
+    # for word in words: 
+    #     syl_count += [len(list(y for y in x if isdigit(y[-1]))) for x in
+    #             d[word.lower()]][0]
+
+    # This seems easier
     for word in words:
-        syl_count += [len(list(y for y in x if isdigit(y[-1]))) for x in
-                d[word.lower()]][0]
+        count = len([syl for syl in d[word.lower()]])
+        print '%s: %d'%( word, count)
+        syl_count += count
+
         if haiku_line_count == 0:
             if syl_count == 5:
                 lines.append(word)
@@ -71,3 +83,13 @@ def is_haiku(text):
             return False
     else:
         return False
+
+if __name__ == '__main__':
+    text = """Haikus are quite fun!
+    But sometimes they do make sense,
+    refrigerator!"""
+
+    if is_english(text):
+        result = is_haiku(text)
+
+    print result
