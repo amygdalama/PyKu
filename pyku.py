@@ -6,6 +6,8 @@ from nltk_contrib.readability.textanalyzer import syllables_en
 import curses
 from curses.ascii import isdigit
 
+
+#This is a change
 class HaikuException(Exception):
     pass
     
