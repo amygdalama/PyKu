@@ -87,9 +87,12 @@ def is_haiku(text):
 if __name__ == '__main__':
     text = """Haikus are quite fun!
     But sometimes they do make sense,
-    refrigerator!"""
+    have a great day sir!"""
 
     if is_english(text):
         result = is_haiku(text)
 
-    print result
+    if result:
+        print "It's a haiku!"
+    else:
+        print "HaikuError!"
