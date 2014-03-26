@@ -1,10 +1,14 @@
 import nltk
 from nltk.corpus import cmudict
+from nltk_contrib.readability.textanalyzer import syllables_en
 
 # digit detection
 import curses
 from curses.ascii import isdigit
 
+class HaikuException(Exception):
+    pass
+    
 # natural language toolkit for syllable countin
 # import nltk
 # from nltk.corpus import cmudict
@@ -19,80 +23,50 @@ def is_english(text):
     words = set(nltk.wordpunct_tokenize(text))
     return len(words & ENGLISH_STOPWORDS) > len(words & NON_ENGLISH_STOPWORDS)
 
-def is_haiku(text):
+def is_haiku(poem):
     import re
     text_orig = text
-    text = text.lower()
+
     # TODO: This block automatically returns false if the Haiku contains numbers
     # this is bullshit.
     if filter(str.isdigit, str(text)):
         return False
 
-    # TODO:
-    # This removes all puncuation, but since we're doing this on code, we don't 
-    # necessarily want that.
-    words = nltk.wordpunct_tokenize(re.sub('[^a-zA-Z_ ]', '',text))
-    syl_count = 0
-    word_count = 0
-    haiku_line_count = 0
-    lines = []
-    d = cmudict.dict()
+    haiku_format = [5, 7, 5]
 
-    # TODO: Is there a corner case we're missing here?????
-    # for word in words: 
-    #     syl_count += [len(list(y for y in x if isdigit(y[-1]))) for x in
-    #             d[word.lower()]][0]
-
-    # This seems easier
-    for word in words:
-        count = len([syl for syl in d[word.lower()]])
-        print '%s: %d'%( word, count)
-        syl_count += count
-
-        if haiku_line_count == 0:
-            if syl_count == 5:
-                lines.append(word)
-                haiku_line_count += 1
-        elif haiku_line_count == 1:
-            if syl_count == 12:
-                lines.append(word)
-                haiku_line_count += 1
-        else:
-            if syl_count == 17:
-                lines.append(word)
-                haiku_line_count += 1
-
-    if syl_count == 17:
-        try:
-            final_lines = []
-
-            str_tmp = ""
-            counter = 0
-            for word in text_orig.split():
-                str_tmp += str(word) + " "
-                if lines[counter].lower() in str(word).lower():
-                    final_lines.append(str_tmp.strip())
-                    counter += 1
-                    str_tmp = ""
-            if len(str_tmp) > 0:
-                final_lines.append(str_tmp.strip())
-            return final_lines
-
-        except Exception as e:
-            print e
-            return False
-    else:
+    # TODO: 
+    # Check for n*3 lines???
+    if len(text) != 3:
         return False
 
+    syl_count = []
+    
+    for line in poem:
+        # TODO:
+        # This removes all puncuation, but since we're doing this on code, we don't 
+        # necessarily want that.
+        words = nltk.wordpunct_tokenize(re.sub('[^a-zA-Z_ ]', '', line))
+        #word_count = 0
+        # This seems easier
+        count = 0
+        for word in words:
+            word = word.lower()
+            #count = len([syl for syl in d[word.lower()]])
+            count += syllables_en.count(word)
+            print '%s: %d'%(word, count)
+        
+        syl_count.append(count)
+
+    if syl_count == haiku_format:
+        return True
+
+    return False
+
 if __name__ == '__main__':
-    text = """Haikus are quite fun!
-    But sometimes they do make sense,
-    have a great day sir!"""
+    text = ['Haikus are  fun', 'but some time they do make sense.', 'Refrigerator!']
 
-    if is_english(text):
-        result = is_haiku(text)
-
+    result = is_haiku(text)
     if result:
         print "It's a haiku!"
     else:
-        print "HaikuError!"
+        raise HaikuException
